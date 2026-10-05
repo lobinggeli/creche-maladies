@@ -76,6 +76,19 @@ header .lede { color: var(--muted); max-width: 62ch; }
 .meta { display: flex; flex-wrap: wrap; gap: 4px 18px; font-size: 14px; color: var(--muted); font-variant-numeric: tabular-nums; }
 .note { font-size: 14px; color: var(--muted); }
 .empty { color: var(--muted); padding: 12px 2px; }
+.what { max-width: 68ch; }
+.ret .lbl { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin-right: 8px; }
+details { border-top: 1px solid var(--line); padding-top: 8px; }
+summary { cursor: pointer; font-weight: 700; color: var(--accent); font-size: 15px; }
+dl { margin: 10px 0 2px; display: grid; grid-template-columns: minmax(0, 11em) minmax(0, 1fr); gap: 8px 16px; }
+dt { font-weight: 700; font-size: 14px; color: var(--muted); }
+dd { margin: 0; max-width: 62ch; }
+@media (max-width: 560px) { dl { grid-template-columns: 1fr; gap: 2px; } dd { margin-bottom: 8px; } }
+.urgent { background: var(--stop-soft); border-radius: 12px; padding: 18px; display: grid; gap: 10px; }
+.urgent ul { margin: 0; padding-left: 18px; display: grid; gap: 6px; }
+.nums { display: flex; flex-wrap: wrap; gap: 8px 20px; }
+.nums span { font-variant-numeric: tabular-nums; }
+.nums strong { user-select: all; }
 
 .grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
 .panel { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 18px; display: grid; gap: 10px; align-content: start; }
@@ -117,7 +130,24 @@ footer a { color: var(--accent); }
         <button type="button" data-f="go" aria-pressed="false">Peut venir</button>
       </div>
     </div>
+    <p class="note">La ligne « Crèche » vient du règlement. Les explications (c'est quoi, symptômes, contagion, quand consulter) sont des informations médicales générales ajoutées pour aider à comprendre : elles ne viennent pas du règlement et ne remplacent pas l'avis du pédiatre.</p>
     <div id="list" class="list"></div>
+  </section>
+
+  <section class="urgent" aria-labelledby="t-urg">
+    <h2 id="t-urg">Quand appeler tout de suite</h2>
+    <ul>
+      <li>L'enfant a du mal à respirer, devient bleu ou fait des pauses respiratoires.</li>
+      <li>Bébé de moins de 3 mois avec de la fièvre (38 °C ou plus).</li>
+      <li>Enfant très mou, difficile à réveiller, ou avec la nuque raide.</li>
+      <li>Taches rouges ou violettes qui ne s'effacent pas quand on appuie un verre dessus.</li>
+      <li>Signes de déshydratation : presque plus de couches mouillées, bouche sèche, pleure sans larmes.</li>
+    </ul>
+    <div class="nums">
+      <span>Urgences : <strong>144</strong></span>
+      <span>Médecin de garde VD : <strong>0848 133 133</strong></span>
+      <span>Intoxication (Tox Info) : <strong>145</strong></span>
+    </div>
   </section>
 
   <section aria-labelledby="t-med">
@@ -174,24 +204,96 @@ footer a { color: var(--accent); }
 
 <script>
 const D = [
-  {n:"Gastro-entérite", s:"virus", st:"stop", r:"Retour 48 h après la fin de la diarrhée.", inc:"36 h en moyenne, 72 h max", k:"vomissements diarrhée ventre crampes", note:"Risque élevé de déshydratation chez les bébés. Hygiène renforcée à la crèche."},
-  {n:"Grippe", s:"influenza", st:"stop", r:"Retour à la fin des symptômes et après 24 h sans fièvre.", k:"fièvre frissons toux bronchite laryngite pneumonie sinusite", note:"Peut durer jusqu'à 2 semaines."},
-  {n:"Impétigo", s:"staphylocoque, streptocoque", st:"stop", r:"Retour une fois le traitement antibiotique terminé.", inc:"2 à 10 jours", k:"peau cloques croûtes miel pus", note:"Les vésicules grattées propagent l'infection."},
-  {n:"Gale", s:"scabiose", st:"stop", r:"Retour 24 h après le début du traitement, ou si le diagnostic est exclu.", k:"démangeaisons acariens peau éruption", note:"Toutes les personnes du foyer doivent être traitées."},
-  {n:"Coqueluche", s:"", st:"stop", r:"Éviction si la structure accueille des bébés de moins de 6 mois. Retour au 5e jour d'antibiotiques, sinon au 22e jour après le début de la toux.", inc:"7 à 10 jours", k:"toux quintes étouffement", note:"Complications graves possibles chez les nourrissons."},
-  {n:"Rougeole", s:"", st:"stop", r:"Isolement à la maison dès la suspicion. Retour au 5e jour après le début de l'éruption, ou si un test exclut la rougeole.", inc:"8 à 10 jours", k:"fièvre éruption toux photophobie", note:"Le médecin la déclare au médecin cantonal sous 24 h."},
-  {n:"Conjonctivite", s:"", st:"mid", chip:"Selon le type", r:"Éviction seulement pour une kératoconjonctivite épidémique confirmée (adénovirus). Les autres conjonctivites : l'enfant peut venir.", k:"yeux paupières collées larmoiement"},
-  {n:"Poux", s:"", st:"go", chip:"Après traitement", r:"Retour après le premier traitement fait par les parents.", k:"démangeaisons cuir chevelu lentes cheveux"},
-  {n:"Pied-main-bouche", s:"virus", st:"go", r:"Peut venir s'il se sent bien et n'a pas eu de fièvre depuis 24 h.", inc:"3 à 10 jours", k:"vésicules éruption bouche mains pieds"},
-  {n:"Bronchiolite", s:"VRS", st:"go", r:"Peut venir s'il se sent bien et n'a pas eu de fièvre depuis 24 h (idéalement sans symptômes).", inc:"2 à 8 jours", k:"toux respiration sifflante RSV", note:"Risque de pneumonie chez les moins de 2 ans."},
-  {n:"Faux croup", s:"", st:"go", r:"Peut venir s'il se sent bien et n'a pas eu de fièvre depuis 24 h.", inc:"48 h en moyenne, 6 jours max", k:"toux aboyante voix rauque laryngite", note:"Surtout chez les moins de 3 ans, souvent la nuit."},
-  {n:"Rhume", s:"", st:"go", r:"Peut venir s'il se sent bien et n'a pas eu de fièvre depuis 24 h.", k:"nez gorge toux"},
-  {n:"Scarlatine", s:"", st:"go", r:"Peut venir s'il se sent bien et n'a pas eu de fièvre depuis 24 h.", inc:"3 à 5 jours", k:"gorge langue fièvre", note:"Sans danger pour les femmes enceintes."},
-  {n:"Varicelle", s:"", st:"go", r:"Peut venir s'il se sent bien et n'a pas eu de fièvre depuis 24 h.", inc:"3 à 10 jours", k:"boutons cloques croûtes", note:"Une femme enceinte en contact doit vérifier son immunité avec son gynécologue."},
-  {n:"Oreillons", s:"", st:"go", r:"Peut venir s'il se sent bien et n'a pas eu de fièvre depuis 24 h.", k:"joue parotide ganglions"},
-  {n:"Rubéole", s:"", st:"go", r:"Peut venir s'il se sent bien et n'a pas eu de fièvre depuis 24 h.", k:"éruption taches ganglions", note:"Prévenir les femmes enceintes : contagieux 7 jours avant l'éruption."},
-  {n:"Muguet", s:"candidose buccale", st:"go", r:"Peut venir s'il se sent bien.", k:"bouche dépôt blanc mycose", note:"Traité avec une pommade prescrite par le médecin."},
-  {n:"Covid-19", s:"", st:"mid", chip:"Selon l'OFSP", r:"On suit les recommandations de l'OFSP en vigueur.", k:"goût odorat grippe"}
+  {n:"Gastro-entérite", s:"virus", st:"stop", r:"Retour 48 h après la fin de la diarrhée.", inc:"36 h en moyenne, 72 h max", k:"vomissements diarrhée ventre crampes", note:"Risque élevé de déshydratation chez les bébés. Hygiène renforcée à la crèche.",
+   what:"Infection de l'intestin, presque toujours due à un virus (rotavirus, norovirus). Très fréquente chez les petits, elle passe en général en 2 à 5 jours.",
+   sy:"Vomissements, diarrhée, maux de ventre et crampes, parfois de la fièvre.",
+   how:"Très contagieuse : par les mains, les objets, les selles et les vomissements.",
+   doc:"Signes de déshydratation (beaucoup moins de couches mouillées, bouche sèche, enfant mou ou somnolent), bébé de moins de 6 mois, sang dans les selles, vomissements qui empêchent de boire."},
+  {n:"Grippe", s:"influenza", st:"stop", r:"Retour à la fin des symptômes et après 24 h sans fièvre.", k:"fièvre frissons toux bronchite laryngite pneumonie sinusite", note:"Peut durer jusqu'à 2 semaines.",
+   what:"Infection par le virus influenza, surtout en hiver. Plus forte qu'un rhume : elle « met à plat » d'un coup.",
+   sy:"Forte fièvre soudaine (plus de 38 °C), frissons, toux, maux de gorge et de tête, courbatures. Chez l'enfant, parfois nausées, vomissements ou diarrhée.",
+   how:"Par les gouttelettes (toux, éternuements) et les mains.",
+   doc:"Respiration difficile ou rapide, fièvre au-delà de 3 jours, enfant très abattu ou qui ne boit plus, bébé de moins de 3 mois avec de la fièvre. Un vaccin existe dès 6 mois."},
+  {n:"Impétigo", s:"staphylocoque, streptocoque", st:"stop", r:"Retour une fois le traitement antibiotique terminé.", inc:"2 à 10 jours", k:"peau cloques croûtes miel pus", note:"Les vésicules grattées propagent l'infection.",
+   what:"Infection de la peau par une bactérie, fréquente entre 2 et 5 ans. Bénigne mais très contagieuse.",
+   sy:"Rougeurs qui démangent, puis petites cloques de liquide ou de pus qui éclatent et forment des croûtes couleur miel. Souvent autour du nez et de la bouche, sur les bras et les jambes.",
+   how:"Par contact direct avec les lésions, les mains et le linge (serviettes).",
+   doc:"Toujours : il faut un traitement antibiotique (crème ou sirop) prescrit par le médecin."},
+  {n:"Gale", s:"scabiose", st:"stop", r:"Retour 24 h après le début du traitement, ou si le diagnostic est exclu.", k:"démangeaisons acariens peau éruption", note:"Toutes les personnes du foyer doivent être traitées.",
+   what:"Minuscule acarien qui creuse sous la peau pour y pondre. Sans rapport avec le manque d'hygiène.",
+   sy:"Fortes démangeaisons, surtout la nuit, et petits boutons ou sillons, souvent entre les doigts, aux poignets et chez les bébés aussi sur les paumes, la plante des pieds et le visage.",
+   how:"Par contact peau contre peau prolongé, plus rarement par le linge et la literie.",
+   doc:"Dès que vous y pensez : le traitement est prescrit. Laver draps, serviettes et vêtements à 60 °C."},
+  {n:"Coqueluche", s:"", st:"stop", r:"Éviction si la structure accueille des bébés de moins de 6 mois. Retour au 5e jour d'antibiotiques, sinon au 22e jour après le début de la toux.", inc:"7 à 10 jours", k:"toux quintes étouffement", note:"Complications graves possibles chez les nourrissons.",
+   what:"Infection des voies respiratoires par une bactérie. Dangereuse surtout pour les bébés de moins de 6 mois. Elle fait partie des vaccins de base.",
+   sy:"Commence comme un rhume, puis quintes de toux violentes qui peuvent faire étouffer ou vomir. La toux peut durer des semaines.",
+   how:"Par les gouttelettes (toux, éternuements).",
+   doc:"Toux en quintes : consulter. Urgence si un bébé devient bleu ou fait des pauses respiratoires."},
+  {n:"Rougeole", s:"", st:"stop", r:"Isolement à la maison dès la suspicion. Retour au 5e jour après le début de l'éruption, ou si un test exclut la rougeole.", inc:"8 à 10 jours", k:"fièvre éruption toux photophobie", note:"Le médecin la déclare au médecin cantonal sous 24 h.",
+   what:"Virus parmi les plus contagieux qui existent. Peut donner des complications graves (pneumonie, encéphalite). Le vaccin ROR protège.",
+   sy:"Forte fièvre, toux, rhume, yeux rouges qui craignent la lumière, puis taches rouges qui commencent au visage et descendent sur le corps.",
+   how:"Par l'air : le virus reste dans une pièce même après le départ du malade.",
+   doc:"À la moindre suspicion. Appeler le cabinet avant de venir, pour ne pas contaminer la salle d'attente."},
+  {n:"Conjonctivite", s:"", st:"mid", chip:"Selon le type", r:"Éviction seulement pour une kératoconjonctivite épidémique confirmée (adénovirus). Les autres conjonctivites : l'enfant peut venir.", k:"yeux paupières collées larmoiement",
+   what:"Inflammation de la fine membrane de l'œil. Elle peut être virale, bactérienne ou allergique, et passe en général en quelques jours.",
+   sy:"Œil rouge, sensation de brûlure ou de sable, larmes, paupières collées au réveil, écoulement jaune ou vert (plutôt bactérien).",
+   how:"Par les mains qui touchent les yeux, les mouchoirs et les serviettes.",
+   doc:"Œil très douloureux ou gonflé, enfant qui voit moins bien ou craint la lumière, bébé de moins d'un mois, pas d'amélioration après 2 à 3 jours."},
+  {n:"Poux", s:"", st:"go", chip:"Après traitement", r:"Retour après le premier traitement fait par les parents.", k:"démangeaisons cuir chevelu lentes cheveux",
+   what:"Petits insectes qui vivent dans les cheveux. Gênants mais sans danger, et sans lien avec la propreté.",
+   sy:"Démangeaisons du cuir chevelu. Les œufs (lentes) sont collés à la base des cheveux, surtout derrière les oreilles et dans la nuque.",
+   how:"Par contact tête contre tête, plus rarement par les bonnets, brosses et doudous.",
+   doc:"En général pas besoin de médecin : un produit de pharmacie et un peigne fin suffisent. Refaire le traitement 7 à 10 jours plus tard."},
+  {n:"Pied-main-bouche", s:"virus", st:"go", r:"Peut venir s'il se sent bien et n'a pas eu de fièvre depuis 24 h.", inc:"3 à 10 jours", k:"vésicules éruption bouche mains pieds",
+   what:"Virus fréquent chez les moins de 5 ans, bénin. Il guérit seul en une semaine environ.",
+   sy:"Fièvre et mal de gorge, puis petites cloques dans la bouche (aphtes douloureux), sur les mains, les pieds et parfois les fesses.",
+   how:"Par la salive, les selles et le liquide des cloques.",
+   doc:"Si l'enfant refuse de boire à cause des aphtes, ou montre des signes de déshydratation."},
+  {n:"Bronchiolite", s:"VRS", st:"go", r:"Peut venir s'il se sent bien et n'a pas eu de fièvre depuis 24 h (idéalement sans symptômes).", inc:"2 à 8 jours", k:"toux respiration sifflante RSV", note:"Risque de pneumonie chez les moins de 2 ans.",
+   what:"Infection virale des petites bronches, surtout en hiver et chez les moins de 2 ans. Le virus le plus courant est le VRS.",
+   sy:"Commence comme un rhume, puis toux, respiration rapide et sifflante, bébé encombré et fatigué qui boit moins.",
+   how:"Par les gouttelettes, les mains et les objets (le virus survit plusieurs heures sur les surfaces).",
+   doc:"Respiration rapide, peau qui se creuse entre les côtes, bébé qui boit moins de la moitié de d'habitude, bébé de moins de 3 mois. Urgence s'il devient bleu ou fait des pauses respiratoires."},
+  {n:"Faux croup", s:"", st:"go", r:"Peut venir s'il se sent bien et n'a pas eu de fièvre depuis 24 h.", inc:"48 h en moyenne, 6 jours max", k:"toux aboyante voix rauque laryngite", note:"Surtout chez les moins de 3 ans, souvent la nuit.",
+   what:"Laryngite virale : la gorge gonfle juste sous les cordes vocales. Impressionnant mais en général bénin.",
+   sy:"Toux qui « aboie », voix rauque, parfois un bruit aigu en inspirant, souvent la nuit.",
+   how:"Par les gouttelettes, comme un rhume.",
+   doc:"Sur le moment, rester calme et faire respirer de l'air frais (fenêtre ouverte, balcon). Urgence (144) si l'enfant a du mal à respirer au repos, bave ou n'arrive plus à avaler."},
+  {n:"Rhume", s:"", st:"go", r:"Peut venir s'il se sent bien et n'a pas eu de fièvre depuis 24 h.", k:"nez gorge toux",
+   what:"Infection virale du nez et de la gorge. Les petits en font souvent 6 à 10 par an, c'est normal.",
+   sy:"Nez qui coule ou bouché, léger mal de gorge, toux, fatigue, parfois un peu de fièvre.",
+   how:"Par les gouttelettes et les mains.",
+   doc:"Fièvre de plus de 3 jours, mal d'oreille, respiration difficile, ou rhume qui dure plus de 10 jours sans s'améliorer."},
+  {n:"Scarlatine", s:"", st:"go", r:"Peut venir s'il se sent bien et n'a pas eu de fièvre depuis 24 h.", inc:"3 à 5 jours", k:"gorge langue fièvre", note:"Sans danger pour les femmes enceintes.",
+   what:"Angine due à une bactérie (streptocoque A), accompagnée d'une éruption. Se soigne bien avec des antibiotiques.",
+   sy:"Forte fièvre, très mal de gorge, petits boutons rouges rugueux comme du papier de verre, puis langue rouge et bosselée (« langue framboise »).",
+   how:"Par les gouttelettes et la salive.",
+   doc:"Oui : le médecin fait un test rapide de la gorge et prescrit un antibiotique."},
+  {n:"Varicelle", s:"", st:"go", r:"Peut venir s'il se sent bien et n'a pas eu de fièvre depuis 24 h.", inc:"3 à 10 jours", k:"boutons cloques croûtes", note:"Une femme enceinte en contact doit vérifier son immunité avec son gynécologue.",
+   what:"Virus très contagieux, en général bénin chez l'enfant. Un vaccin existe.",
+   sy:"Un peu de fièvre puis boutons rouges qui démangent, deviennent des cloques puis des croûtes, par vagues pendant quelques jours.",
+   how:"Par l'air et le liquide des cloques. Contagieux 1 à 2 jours avant les boutons et jusqu'à ce qu'ils soient tous en croûte.",
+   doc:"Bouton rouge, chaud et gonflé (infecté), forte fièvre qui dure, enfant très somnolent. Pour la fièvre, préférer le paracétamol (Dafalgan) à l'ibuprofène."},
+  {n:"Oreillons", s:"", st:"go", r:"Peut venir s'il se sent bien et n'a pas eu de fièvre depuis 24 h.", k:"joue parotide ganglions",
+   what:"Virus qui fait gonfler les glandes salivaires. Devenu rare grâce au vaccin ROR.",
+   sy:"Joue(s) gonflée(s) sous l'oreille, difficulté à mâcher et avaler, fièvre.",
+   how:"Par les gouttelettes et la salive.",
+   doc:"Pour confirmer le diagnostic. Vite si l'enfant a de forts maux de tête, la nuque raide ou mal au ventre."},
+  {n:"Rubéole", s:"", st:"go", r:"Peut venir s'il se sent bien et n'a pas eu de fièvre depuis 24 h.", k:"éruption taches ganglions", note:"Prévenir les femmes enceintes : contagieux 7 jours avant l'éruption.",
+   what:"Virus bénin chez l'enfant mais dangereux pour le bébé à naître. Le vaccin ROR protège.",
+   sy:"Petites taches roses sur la peau, légère fièvre, ganglions gonflés derrière les oreilles et dans la nuque.",
+   how:"Par les gouttelettes.",
+   doc:"Pour confirmer le diagnostic, et prévenir les femmes enceintes de l'entourage."},
+  {n:"Muguet", s:"candidose buccale", st:"go", r:"Peut venir s'il se sent bien.", k:"bouche dépôt blanc mycose", note:"Traité avec une pommade prescrite par le médecin.",
+   what:"Petit champignon (Candida) déjà présent dans la bouche qui se multiplie trop. Très fréquent chez les bébés.",
+   sy:"Dépôts blancs comme du lait caillé dans la bouche, qui ne partent pas en essuyant. Bouche rouge, parfois douloureuse.",
+   how:"Peu contagieux. Bien nettoyer tétines et biberons.",
+   doc:"Pour le traitement (gel ou pommade). Plus vite si le bébé refuse de boire."},
+  {n:"Covid-19", s:"", st:"mid", chip:"Selon l'OFSP", r:"On suit les recommandations de l'OFSP en vigueur.", k:"goût odorat grippe",
+   what:"Virus respiratoire, en général léger chez les enfants.",
+   sy:"Comme un rhume ou une grippe : fièvre, toux, fatigue, parfois perte du goût et de l'odorat.",
+   how:"Par les gouttelettes et l'air.",
+   doc:"Mêmes signes d'alerte que pour la grippe : respiration difficile, enfant très abattu, bébé de moins de 3 mois avec de la fièvre."}
 ];
 const LBL = {stop:"Éviction", go:"Peut venir", mid:""};
 const list = document.getElementById("list"), q = document.getElementById("q");
@@ -201,16 +303,25 @@ const esc = s => s.replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'
 function render() {
   const t = norm(q.value.trim());
   const rows = D.filter(d => (f === "all" || d.st === f || (f === "go" && d.st === "mid")) &&
-    (!t || norm(d.n + " " + d.s + " " + d.k).includes(t)));
+    (!t || norm([d.n, d.s, d.k, d.what, d.sy].join(" ")).includes(t)));
   list.innerHTML = rows.length ? rows.map(d => `
     <article class="item">
       <div class="item-head">
         <h3>${esc(d.n)}${d.s ? `<small>${esc(d.s)}</small>` : ""}</h3>
         <span class="chip ${d.st}">${esc(d.chip || LBL[d.st])}</span>
       </div>
-      <p class="ret">${esc(d.r)}</p>
+      <p class="what">${esc(d.what)}</p>
+      <p class="ret"><span class="lbl">Crèche</span>${esc(d.r)}</p>
       ${d.inc ? `<div class="meta"><span>Incubation : ${esc(d.inc)}</span></div>` : ""}
       ${d.note ? `<p class="note">${esc(d.note)}</p>` : ""}
+      <details>
+        <summary>Symptômes, contagion, quand consulter</summary>
+        <dl>
+          <dt>Symptômes</dt><dd>${esc(d.sy)}</dd>
+          <dt>Comment ça s'attrape</dt><dd>${esc(d.how)}</dd>
+          <dt>Quand consulter</dt><dd>${esc(d.doc)}</dd>
+        </dl>
+      </details>
     </article>`).join("") : `<p class="empty">Aucune maladie ne correspond. Le règlement ne la mentionne peut-être pas : demander à la crèche.</p>`;
 }
 document.querySelectorAll(".filters button").forEach(b => b.addEventListener("click", () => {
