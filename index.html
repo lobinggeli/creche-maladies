@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Crèche malade ou pas ?</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap">
+<style>
+/* Layout: single reading column; golden-rule panel, then a filterable list of diseases with a traffic-light status chip */
+:root {
+  --bg: #f3f6f7;
+  --surface: #ffffff;
+  --fg: #17262b;
+  --muted: #56686e;
+  --line: #d6e0e3;
+  --accent: #0f6f80;
+  --accent-soft: #dcefF2;
+  --stop: #b3261e;
+  --stop-soft: #fbe5e2;
+  --go: #1d7a3e;
+  --go-soft: #e0f3e6;
+  --mid: #8a5a00;
+  --mid-soft: #fbefd5;
+  --display: "Bricolage Grotesque", "Avenir Next", system-ui, sans-serif;
+  --body: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f181b; --surface: #16232700; --surface: #172327; --fg: #e3ecee; --muted: #9bb0b5; --line: #2a3b40;
+    --accent: #5cc3d4; --accent-soft: #163a41;
+    --stop: #ff8a80; --stop-soft: #3a1c1a; --go: #7fd69a; --go-soft: #173222; --mid: #f0c060; --mid-soft: #362a12;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f181b; --surface: #172327; --fg: #e3ecee; --muted: #9bb0b5; --line: #2a3b40;
+  --accent: #5cc3d4; --accent-soft: #163a41;
+  --stop: #ff8a80; --stop-soft: #3a1c1a; --go: #7fd69a; --go-soft: #173222; --mid: #f0c060; --mid-soft: #362a12;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--fg); font: 16px/1.55 var(--body); }
+.wrap { max-width: 860px; margin: 0 auto; padding-inline: 16px; padding-block: 32px 64px; display: grid; gap: 28px; }
+h1, h2, h3 { font-family: var(--display); text-wrap: balance; margin: 0; }
+h1 { font-size: clamp(30px, 6vw, 44px); font-weight: 800; line-height: 1.05; letter-spacing: -0.01em; }
+h2 { font-size: 22px; font-weight: 800; }
+h3 { font-size: 18px; font-weight: 600; }
+p { margin: 0; }
+.eyebrow { font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); font-weight: 700; }
+header { display: grid; gap: 10px; }
+header .lede { color: var(--muted); max-width: 62ch; }
+
+.rule { background: var(--accent-soft); border-radius: 14px; padding: 22px; display: grid; gap: 14px; }
+.rule-main { font-family: var(--display); font-weight: 800; font-size: clamp(22px, 4.2vw, 30px); line-height: 1.15; color: var(--accent); }
+.checks { display: flex; flex-wrap: wrap; gap: 8px; list-style: none; margin: 0; padding: 0; }
+.checks li { background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 6px 14px; font-weight: 700; font-size: 15px; }
+
+.toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.search { flex: 1 1 220px; min-width: 0; padding: 10px 14px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); color: var(--fg); font: inherit; }
+.filters { display: flex; gap: 6px; flex-wrap: wrap; }
+.filters button { font: inherit; font-size: 14px; font-weight: 700; border: 1px solid var(--line); background: var(--surface); color: var(--fg); padding: 8px 14px; border-radius: 999px; cursor: pointer; }
+.filters button[aria-pressed="true"] { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+.list { display: grid; gap: 10px; }
+.item { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; display: grid; gap: 8px; }
+.item-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.item-head h3 small { font-family: var(--body); font-weight: 400; font-size: 14px; color: var(--muted); margin-left: 6px; }
+.chip { font-size: 13px; font-weight: 700; padding: 3px 10px; border-radius: 999px; white-space: nowrap; }
+.chip.stop { background: var(--stop-soft); color: var(--stop); }
+.chip.go { background: var(--go-soft); color: var(--go); }
+.chip.mid { background: var(--mid-soft); color: var(--mid); }
+.ret { font-weight: 700; }
+.meta { display: flex; flex-wrap: wrap; gap: 4px 18px; font-size: 14px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.note { font-size: 14px; color: var(--muted); }
+.empty { color: var(--muted); padding: 12px 2px; }
+
+.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 18px; display: grid; gap: 10px; align-content: start; }
+.panel ul { margin: 0; padding-left: 18px; display: grid; gap: 6px; }
+.panel.warn { border-color: var(--mid); }
+section { display: grid; gap: 14px; }
+footer { font-size: 14px; color: var(--muted); display: grid; gap: 4px; border-top: 1px solid var(--line); padding-top: 16px; }
+footer a { color: var(--accent); }
+.tel { font-variant-numeric: tabular-nums; font-weight: 700; color: var(--fg); user-select: all; }
+@media (prefers-reduced-motion: no-preference) { .filters button { transition: background .15s, color .15s; } }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <span class="eyebrow">kids &amp; co · Canton de Vaud · règlement de juin 2026</span>
+    <h1>Mon enfant est malade : crèche ou maison ?</h1>
+    <p class="lede">Résumé du règlement maladies de la crèche : quand l'enfant peut venir, quand il doit rester à la maison, et comment la crèche donne les médicaments.</p>
+  </header>
+
+  <div class="rule">
+    <span class="eyebrow">Règle de base, valable pour la plupart des maladies</span>
+    <p class="rule-main">L'enfant peut venir s'il se sent bien et n'a pas eu de fièvre depuis 24&nbsp;heures.</p>
+    <ul class="checks">
+      <li>Se sent bien</li>
+      <li>Peut suivre la journée</li>
+      <li>24 h sans fièvre</li>
+    </ul>
+  </div>
+
+  <section aria-labelledby="t-mal">
+    <h2 id="t-mal">Maladie par maladie</h2>
+    <div class="toolbar">
+      <input id="q" class="search" type="search" placeholder="Chercher une maladie ou un symptôme…" aria-label="Chercher une maladie">
+      <div class="filters" role="group" aria-label="Filtrer">
+        <button type="button" data-f="all" aria-pressed="true">Toutes</button>
+        <button type="button" data-f="stop" aria-pressed="false">Éviction</button>
+        <button type="button" data-f="go" aria-pressed="false">Peut venir</button>
+      </div>
+    </div>
+    <div id="list" class="list"></div>
+  </section>
+
+  <section aria-labelledby="t-med">
+    <h2 id="t-med">Médicaments et obligations des parents</h2>
+    <div class="grid2">
+      <div class="panel">
+        <h3>Fièvre : Dafalgan</h3>
+        <ul>
+          <li>La crèche peut donner du <strong>Dafalgan par la bouche</strong>.</li>
+          <li>Elle <strong>appelle d'abord</strong> les parents.</li>
+          <li>Le parent <strong>confirme le poids et la dose par e-mail</strong>.</li>
+          <li><strong>Jamais de suppositoire</strong> : les parents viennent le donner eux-mêmes si nécessaire.</li>
+        </ul>
+      </div>
+      <div class="panel">
+        <h3>Autres médicaments</h3>
+        <ul>
+          <li>Seulement avec une <strong>ordonnance valable</strong> et un médicament étiqueté et daté.</li>
+          <li>Le matin, le parent remplit une <strong>feuille</strong> : posologie et heures de prise.</li>
+          <li>L'équipe y note chaque prise (heure, dose).</li>
+        </ul>
+      </div>
+      <div class="panel">
+        <h3>Ce que les parents doivent faire</h3>
+        <ul>
+          <li><strong>Informer</strong> l'équipe de toute maladie de l'enfant.</li>
+          <li>Sous <strong>antibiotiques</strong>, le retour est décidé par le pédiatre de l'enfant ou celui de la crèche.</li>
+          <li>En cas d'épidémie, les règles cantonales et fédérales s'appliquent, et la direction peut en ajouter (communiquées par écrit).</li>
+        </ul>
+      </div>
+      <div class="panel warn">
+        <h3>Rougeole sans vaccin</h3>
+        <p>Un enfant <strong>non vacciné</strong> peut être exclu jusqu'à <strong>3 semaines</strong> si la rougeole est suspectée (directive OFSP). <strong>Les frais de crèche restent facturés</strong> pendant cette période.</p>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="t-odd">
+    <h2 id="t-odd">Erreurs ou bizarreries dans le document</h2>
+    <div class="panel">
+      <ul>
+        <li><strong>Varicelle</strong> : le texte dit que « dans 80% des cas, la maladie évolue sans symptômes ». C'est douteux sur le plan médical, probablement un copier-coller. La règle pratique ne change pas.</li>
+        <li><strong>Gale</strong> : le lien renvoie au site du canton de Berne, pas de Vaud.</li>
+        <li><strong>Gastro</strong> : le retour est fixé à 48 h après la fin de la diarrhée. Rien n'est dit pour des vomissements seuls : à demander à la crèche.</li>
+      </ul>
+    </div>
+  </section>
+
+  <footer>
+    <p>Office du médecin cantonal VD · Av. des Casernes 2, 1014 Lausanne · <span class="tel">021 316 47 95</span></p>
+    <p>Sources du règlement : <a href="https://www.evictionscolaire.ch/accueil">evictionscolaire.ch</a> · <a href="https://www.bag.admin.ch/bag/fr/home/krankheiten.html">OFSP</a>. Ce résumé ne remplace pas l'avis du pédiatre.</p>
+  </footer>
+</div>
+
+<script>
+const D = [
+  {n:"Gastro-entérite", s:"virus", st:"stop", r:"Retour 48 h après la fin de la diarrhée.", inc:"36 h en moyenne, 72 h max", k:"vomissements diarrhée ventre crampes", note:"Risque élevé de déshydratation chez les bébés. Hygiène renforcée à la crèche."},
+  {n:"Grippe", s:"influenza", st:"stop", r:"Retour à la fin des symptômes et après 24 h sans fièvre.", k:"fièvre frissons toux bronchite laryngite pneumonie sinusite", note:"Peut durer jusqu'à 2 semaines."},
+  {n:"Impétigo", s:"staphylocoque, streptocoque", st:"stop", r:"Retour une fois le traitement antibiotique terminé.", inc:"2 à 10 jours", k:"peau cloques croûtes miel pus", note:"Les vésicules grattées propagent l'infection."},
+  {n:"Gale", s:"scabiose", st:"stop", r:"Retour 24 h après le début du traitement, ou si le diagnostic est exclu.", k:"démangeaisons acariens peau éruption", note:"Toutes les personnes du foyer doivent être traitées."},
+  {n:"Coqueluche", s:"", st:"stop", r:"Éviction si la structure accueille des bébés de moins de 6 mois. Retour au 5e jour d'antibiotiques, sinon au 22e jour après le début de la toux.", inc:"7 à 10 jours", k:"toux quintes étouffement", note:"Complications graves possibles chez les nourrissons."},
+  {n:"Rougeole", s:"", st:"stop", r:"Isolement à la maison dès la suspicion. Retour au 5e jour après le début de l'éruption, ou si un test exclut la rougeole.", inc:"8 à 10 jours", k:"fièvre éruption toux photophobie", note:"Le médecin la déclare au médecin cantonal sous 24 h."},
+  {n:"Conjonctivite", s:"", st:"mid", chip:"Selon le type", r:"Éviction seulement pour une kératoconjonctivite épidémique confirmée (adénovirus). Les autres conjonctivites : l'enfant peut venir.", k:"yeux paupières collées larmoiement"},
+  {n:"Poux", s:"", st:"go", chip:"Après traitement", r:"Retour après le premier traitement fait par les parents.", k:"démangeaisons cuir chevelu lentes cheveux"},
+  {n:"Pied-main-bouche", s:"virus", st:"go", r:"Peut venir s'il se sent bien et n'a pas eu de fièvre depuis 24 h.", inc:"3 à 10 jours", k:"vésicules éruption bouche mains pieds"},
+  {n:"Bronchiolite", s:"VRS", st:"go", r:"Peut venir s'il se sent bien et n'a pas eu de fièvre depuis 24 h (idéalement sans symptômes).", inc:"2 à 8 jours", k:"toux respiration sifflante RSV", note:"Risque de pneumonie chez les moins de 2 ans."},
+  {n:"Faux croup", s:"", st:"go", r:"Peut venir s'il se sent bien et n'a pas eu de fièvre depuis 24 h.", inc:"48 h en moyenne, 6 jours max", k:"toux aboyante voix rauque laryngite", note:"Surtout chez les moins de 3 ans, souvent la nuit."},
+  {n:"Rhume", s:"", st:"go", r:"Peut venir s'il se sent bien et n'a pas eu de fièvre depuis 24 h.", k:"nez gorge toux"},
+  {n:"Scarlatine", s:"", st:"go", r:"Peut venir s'il se sent bien et n'a pas eu de fièvre depuis 24 h.", inc:"3 à 5 jours", k:"gorge langue fièvre", note:"Sans danger pour les femmes enceintes."},
+  {n:"Varicelle", s:"", st:"go", r:"Peut venir s'il se sent bien et n'a pas eu de fièvre depuis 24 h.", inc:"3 à 10 jours", k:"boutons cloques croûtes", note:"Une femme enceinte en contact doit vérifier son immunité avec son gynécologue."},
+  {n:"Oreillons", s:"", st:"go", r:"Peut venir s'il se sent bien et n'a pas eu de fièvre depuis 24 h.", k:"joue parotide ganglions"},
+  {n:"Rubéole", s:"", st:"go", r:"Peut venir s'il se sent bien et n'a pas eu de fièvre depuis 24 h.", k:"éruption taches ganglions", note:"Prévenir les femmes enceintes : contagieux 7 jours avant l'éruption."},
+  {n:"Muguet", s:"candidose buccale", st:"go", r:"Peut venir s'il se sent bien.", k:"bouche dépôt blanc mycose", note:"Traité avec une pommade prescrite par le médecin."},
+  {n:"Covid-19", s:"", st:"mid", chip:"Selon l'OFSP", r:"On suit les recommandations de l'OFSP en vigueur.", k:"goût odorat grippe"}
+];
+const LBL = {stop:"Éviction", go:"Peut venir", mid:""};
+const list = document.getElementById("list"), q = document.getElementById("q");
+let f = "all";
+const norm = s => s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+const esc = s => s.replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function render() {
+  const t = norm(q.value.trim());
+  const rows = D.filter(d => (f === "all" || d.st === f || (f === "go" && d.st === "mid")) &&
+    (!t || norm(d.n + " " + d.s + " " + d.k).includes(t)));
+  list.innerHTML = rows.length ? rows.map(d => `
+    <article class="item">
+      <div class="item-head">
+        <h3>${esc(d.n)}${d.s ? `<small>${esc(d.s)}</small>` : ""}</h3>
+        <span class="chip ${d.st}">${esc(d.chip || LBL[d.st])}</span>
+      </div>
+      <p class="ret">${esc(d.r)}</p>
+      ${d.inc ? `<div class="meta"><span>Incubation : ${esc(d.inc)}</span></div>` : ""}
+      ${d.note ? `<p class="note">${esc(d.note)}</p>` : ""}
+    </article>`).join("") : `<p class="empty">Aucune maladie ne correspond. Le règlement ne la mentionne peut-être pas : demander à la crèche.</p>`;
+}
+document.querySelectorAll(".filters button").forEach(b => b.addEventListener("click", () => {
+  f = b.dataset.f;
+  document.querySelectorAll(".filters button").forEach(x => x.setAttribute("aria-pressed", x === b));
+  render();
+}));
+q.addEventListener("input", render);
+render();
+</script>
+</body>
+</html>
